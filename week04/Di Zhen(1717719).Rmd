@@ -1,0 +1,148 @@
+---
+title: "Di Zhen (1717719)"
+author: "dizhen"
+date: "2020.3.20."
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Set working directory:
+
+```{r}
+setwd("D:/git/DPH112-xjtlu/week04")
+```
+Data
+
+```{r}
+IGE <- c(24.87,12.90,9.87,8.74,6.88,5.90,4.85,3.53,2.25,2.14,1.94,1.29,0.94,0.91,0.55,0.30,0.14,0.11,0.10,0.10,0.10,0.10,0.10)
+SKIN <- c(0.055,0.041034,0.050909,0.046,0.039032,0.050909,0.042142,0.055,4.333333,0.55,0.050909,0.446153,0.4,0.475,4.461538,4.103448,7.428571,4.461538,6.625,49.13043,36.47058,52.85714,47.5)
+mydata <- data.frame(IGE,SKIN)
+str(mydata)
+head(mydata)
+```
+
+Visualize the data:
+
+```{r}
+plot(IGE ~ SKIN, data = mydata,
+     main = "Immunoglobulin E (IgE) and skin test levels\n following exposure to Lol p 5.in natural log units",
+     xlab = "Ln(skin test)",
+     ylab = "Ln(IgE)")
+```
+
+## Question 1
+A properly-formatted scatterplot of the data:
+
+```{r}
+if(!require(car)){install.packages("car")}
+library(car)
+scatterplot(IGE ~ SKIN, data = mydata,smooth = FALSE, regLine=FALSE,
+     main = "Immunoglobulin E (IgE) and skin test levels\n following exposure to Lol p 5.in natural log units",
+     ylab = "Ln(IgE) ",
+     xlab = "Ln(skin test)")
+```
+
+## Question 2
+
+```{r}
+mydata.LM <- lm(IGE ~ SKIN,data = mydata)
+summary(mydata.LM)
+```
+Interpretation: The estimated intercept is 4.972(p=0.001), the estimated slope is -0.117 (p=0.097).
+
+## Question 3
+
+Test the null hypothesis of $H_0: \beta_0 = 0$: As alpha = 0.1, p-value = 0.001, 0.001<0.1. We reject the null hypothesis and conclude that $\beta_0 \neq 0$.
+
+Test the null hypothesis of $H_0: \beta_1 = 0$: As alpha = 0.1, p-value = 0.097,0.097 < 0.1. We reject the null hypothesis and conclude that $\beta_1 \neq 0$.
+
+Interpretation of p-value: there is 0.1% probability that we would observe at least as extreme a result as this for the intercept estimate under the null hypothesis.  There is 9.7% probability that we would observe at least as extreme a result as this for the slope estimate under the null hypothesis.
+
+## Question 4
+
+```{r}
+confint(mydata.LM, level = 0.90)
+```
+
+
+The 90% confidence interval for intercept is from 2.677 to 7.268. We are 90% confident that the intercept estimate lies between the interval 2.677 and 7.268, because on repeated sampling, 90% of intervals constructed in ths manner will contain the true intercept.
+
+The 90% confidence interval for slope is from -0.233 to -0.001. We are 90% confident that the slope estimate lies between the interval -0.233 and -0.001, because on repeated sampling, 90% of intervals constructed in ths manner will contain the true slope.
+
+## Question 5
+
+1. Assessing normality
+
+```{r}
+mydata.RESID <- resid(mydata.LM)
+hist(mydata.RESID, 
+     main = "Histogram of Ordinary Residuals",
+     xlab = "Residual")
+qqnorm(mydata.RESID,
+       main = "Normal Quantile-Quantile Plot of Ordinary Residuals")
+qqline(mydata.RESID)
+```
+Assessment. The residuals deviate substantially from normality.
+
+Conclusion. The assumption of normality is not met.
+
+2. Assessing linearity
+
+```{r}
+FITTED <- predict(mydata.LM,type = "response")
+RESID <- resid(mydata.LM)
+mydata2 <- cbind(mydata,FITTED, RESID)
+str(mydata2)
+head(mydata2)
+plot(RESID ~ FITTED,data = mydata2,
+     main = "RvF Plot",
+     ylab = "Residuals",
+     xlab = "Fitted Values")
+abline(h=0)
+```
+Assessment. The spread of residuals shows obvious pattern.
+
+Conclusion. The assumption of linearity is not met.
+
+3. Assessing homoskedasticity
+
+```{r}
+plot(RESID ~ FITTED, data = mydata2,
+     main = "RvF Plot",
+     ylab = "Residuals",
+     xlab = "Fitted Values")
+abline(h=0)
+```
+
+Assessment. The RvF plot show evidence of some patterns
+
+Conclusion. The assumption of homoskedasticity is not met.
+
+4. Assessing independence
+
+From the design of the experiment, we know that statistical independence of skin test presents.
+
+## Quetion 6
+
+```{r}
+predict(mydata.LM, data.frame(SKIN = 0.1), interval = "prediction", level = 0.90)
+```
+
+IgE level on an individual in natural log units is 4.961 if the skin test level in natural log units is 0.1.90% intervals is from -4.942 to 14.863.
+
+## Question 7
+```{r}
+predict(mydata.LM, data.frame(SKIN = 0.1), interval = "confidence", level = 0.90)
+```
+
+
+The mean IgE level in natural log units is 4.961, if the skin test level in natural log units is 0.1. 90% intervals is from 2.671 to 7.250.
+
+
+## THE END
+
