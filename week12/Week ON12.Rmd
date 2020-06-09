@@ -1,0 +1,170 @@
+---
+title: "Week ON12"
+author: "Elmer V Villanueva"
+date: "11 May 2020"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# SET YOUR WORKING DIRECTORY!
+```{r}
+setwd("C:/Users/1/Dropbox/00 - Working Folder/Teaching/DPH112/2019-2020/Week ON12")
+```
+
+# Announcements 
+* The two coursework assessments and the final paper have been released. The deadlines are 
+
+| Assessment | Due Date | Days Till Deadline |
+|:--------------------|---------:|----:|
+| Coursework 1        | 16 May   | 05  |
+| coursework 2        | 30 May   | 19  |
+| Final Paper         | 17 June  | 37  |
+
+* All the assessments are to be completed INDIVIDUALLY. No collusion is allowed. This means that you cannot discuss this assignment with other students, nor can you share your approach or code.
+
+* The running count for students forwarding errors is as follows:
+
+| Student | Items Identified |
+|:--------|:----------------:|
+| Yijia Jiang | 6 |
+| Jing Wang   | 3 |
+| Xinwen Hu   | 1 |
+| Yuxuan Wu   | 1 |
+
+# Reading
+Read and understand the two research papers that are included in ICE for this week.
+
+# Introduction
+We are taking a break from the discussion on logistic regressio to conduct a special lession. We will finalise the topic of logistic regression next week.
+
+In this sesion, we will examine published research papers that have used multiple linear regression in their analysis. I will discuss two papers. In each paper, we will focus on the methods and presentation of results. You need to know a little bit about the topic of the research, of course, but I will leave that to you to study.
+
+The first paper is by Mutch and colleagues [1]. Dr Mutch led a team that studied whether low carbon dioxide concentrations in the blood (termed *hypocapnia*) is related to the development of changes to the brain manifesting as mental confusion. These brain changes produce *delirium*. The research team studied this relatipnship in patients undergoing surgery, where delirium is a common occurence after the operation.
+
+The second paper is by Gurholt and colleagues [2]. The paper describes the results of a study that looked at the relationship between two vitamins - folate and vitamin D -- on the volume of the part of the skull that encases the brain (termed the *cranium*). They studied patients with severe mental disorders as well as healthy controls.
+
+IMPORTANT: I am using these studies as *models* of currently acceptable ways of presenting statistical information to academic audiences. However, these are only some of the few ways to present your work. There are many, many more ways. You should use your private study time to explore the ways others have done this.
+
+IMPORTANT: It is important that you apply some of these techniques in your own outputs, such as in your coursework for this and other modules, as well as -- and probably more importantly -- in your final year projects. 
+
+# Mutch et al.
+
+## Objectives
+The objectives, research questions or hypotheses of the study are the first thing you should understand when reading a paper. In the typical IMRAD paper, you will spot these in two places: the abstract and the last paragraph of the introduction (before the methods section). In Mutch et al., these occur in both places (Figures 1 and 2)
+
+![Abstract of Mutch et al. with objective highlighted.](Mutch01.jpg)
+
+\pagebreak
+
+Note how the authors have expanded on the objective in the abstract by stating it in two forms in the final paragraph of the introduction.
+
+![Paragraph in the introduction of Mutch et al. with objective and hypothesis highlighted.](Mutch02.jpg)
+
+The hypothesis is very specific. Since they anticipated "controlling for pre-morbit factors", we already know that there will be more than one independent variable. The main independent variable is the carbon dioxide concentration and all others are so-called "nuisance" variables. That is, we measure them in order to control for them. We are really not interested in their results, *per se*.
+
+\pagebreak
+
+## Methods
+In Figure 3, the authors describe their statistical methods. I've highlighted the statements where linear regression methods are mentioned.
+
+![Statistical analysis in Mutch et al. with regression methods highlighted.](Mutch03.jpg)
+
+The authors use the term "bivariate linear regression model". This is another term for the simple linear regression model. Thus, thay said that they first conducted a simple linear regression followed by a multiple linear regression. The list of variables that they used is given.
+
+What is not stated is the level of significance and the degree of confidence that they used. It is inappropriate to leave out this important information.
+
+\pagebreak
+
+## Results
+It is usually the case that the first table you will present describes your study population. This is what the authors have done (Figure 4).
+
+![The first table of Mutch et al.](Mutch04.jpg)
+
+Here is it important to note that they actually have *two* ways to measure the dependent variable (shown by the two columns) -- the mean severity of delirium and the peak severity of delirium. This means that they will run simple and multiple linear regressions two times using the two dependent variables one at a time.
+
+In the Mutch et al. paper, you will see that they have provided scatterplots and regression lines with confidence intervals. Based on the degree of confidence that they used, we can deduce that their level of significance was 0.05. Nevertheless, this should have been stated clearly. In each scatterplot in the paper's Figures 3 and 4, the simple linear regression equations are also given.  
+
+\pagebreak
+
+The regression estimates for the simple and multiple linear regression models are presented in the paper's Table 2 (which I recreate here in Figure 5)
+
+![The second table of Mutch et al.](Mutch05.jpg)
+
+This is actually four tables in one. First, focus on the green highlight. These are the two ways that the dependent variable was measured. Next, focus on the blue highlight. These are the two ways the authors measured the main independent variable. Thus, the four tables in are 
+
+- POD peak by AUC carbon dioxide
+- POD peak by AUC carbon dioxide
+- POD mean by AOC carbon dioxide
+- POD mean by AOC carbon dioxide
+
+The authors were very frugal in their design of the table.
+
+Let us focus only on one of the subtables -- POD peak by AUC carbon dioxide. Note that there are two models. You will see in the footnote highlighted yellow that Model 1 are the estimates arising from the simple linear regression model and Model 2 are those arising from the multiple linear regression model. This is the typical way to present regression estimates. Finally, note that the intercept is very rarely presented. In this case, this is appropriate because it is physically impossible to have a zero concentration of carbon dioxide in the blood.
+
+Let us list the equations for the all simple linear regression performed for the POD peak by AUC carbon dioxide subtable.
+
+- $POD\ peak \ score = \beta_{01} + 0.055 AGE$
+- $POD\ peak \ score = \beta_{02} + 0.286 BLESSED$
+- $POD\ peak \ score = \beta_{03} + 0.273 PHQ$
+- $POD\ peak \ score = \beta_{04} + 0.246 AUC\ CO_2$
+
+Remember, we're really not interested in the first three equations, because they don't feature our main independent variable. However, it is important that we report it, because it gives us information on the nuisance variables.
+
+Finally, the multiple linear regression equation is
+
+$POD\ peak \ score = \beta_{05} + 0.067 AGE + 0.338 BLESSED + 0.145 PHQ + 0.220 AUC\ CO_2$
+
+You can create equations for the other three subtables, too.
+
+Note that the results of diagnostic tests are not presented. In general, published articles leave out this information. Howevere, it does not mean that diagnostic testing was not performed.
+
+# Gurholt et al.
+
+## Objectives
+The objectives for the study by Gurholt and colleagues appear in the paper in the expected areas (Figures 6 and 7).
+
+![Abstract of Gurholt et al. with objective highlighted.](Gurholt01.jpg)
+
+![Paragraph in the introduction of Gurholt et al. with objective and hypothesis highlighted.](Gurholt02.jpg)
+
+\pagebreak
+
+## Methods
+
+The statistical methods, shown in Figure 8, are quite well described. Similar to the previous example, there are two main independent variables -- serum vitamin D (S-25(OH)D) and serum folate (S-folate). The authors defined three regression models. Model 1 is the linear regression of intracranial volume (ICV) on the first independent variable, S-25(OH)D. Model 2 is the linear regression of ICV on S-folate. The final model, Model 3, is the linear regression of ICV on both S-25(OH)D and S-folate at the same time. All models adjust for a numnber of nuisance variables. Therefore, unlike the previous example, all models in Gurholt are multiple linear regression models.
+
+![Statistical analysis in Gurholt et al. with regression methods highlighted.](Gurholt03.jpg)
+
+Pay attention to the sentence highlighted in blue. Here, the authors do state the level of significance that they used. Importantly, they also state that all model estimates are standardised. (Review the materials in Week 10 if you need to.) This means that all results are not in volumetric units (e.g., mL) but in unitless values of standard deviations units.
+
+IMPORTANT: The authors state that the R script that they used is available if you write to the first author. I suggest that you do so. This will give you an idea of the way an experienced analyst structures his code.
+
+\pagebreak
+
+## Results
+Again, similar to the previous example, Table 1 in the original paper presents descriptions of the study population. You should learn to practice this. 
+
+The main results for the regression model is given in Table 2 in the original paper (which I recreate here as Figure 9).
+
+![The regression results of Gurholt et al.](Gurholt04.jpg)
+
+Model 1, which includes S-25(OH)D alone, does not show a result for S-folate. Model 2, which includes S-folate alone, does not include results for S-25(OH)D. Finally, Model 3 includes both S-25(OH)D and S-folate. Note, too, how all other variables are included in these results.
+
+Now, pay attention to the footnote. Notice how the authors have stated what the reference categories are for the categorical independent variables that were included in the model. For example, footnote c states that the reference cagetory for `sex` is female.
+
+Can you try to produce the regression equation for each of the three models?
+
+The major omission in Gurholt et al. was that they did not present scatterplots. This is very poor practice. It shows that even work published in some of the best journals may contain serious errors. 
+
+# References
+
+1. Mutch WAC, El-Gabalawy R, Girling L, Kilborn K and Jacobsohn E. End-tidal hypocapnia under anesthesia predicts postoperative delirium. *Front Neurol* 2018;9:678.
+
+2. Gurholt TP, Osnes K, Nerhus M, Jorgensen KN, Lonning V, Berg A, Andreassen OA, Melle I, Agartz I. Vitamin D, folate and the intracranial volume in schizophrenia and bipolar disorder and healthy controls. *Sci Reports* 2018;8:10817.
+
+
+# THE END
