@@ -1,0 +1,118 @@
+---
+title: "DiZhen_1717719"
+author: "dizhen"
+date: "4/26/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Set directory
+
+```{r}
+setwd('D:/git/DPH112-xjtlu/week09')
+```
+
+Data
+
+```{r}
+KBI <- c(28,68,59,91,70,38,46,57,89,48,74,78,43,76,72,61,63,77,85,31,79,92,76,91,78,103,99,73,88,64,52,71,41,85,52,68,57,84,91,83,73,57,69,81,71,91,48,94,57,49,88,54,73,87,47,60,65,57,85,28,40,87,80,49,57,32,52,42,49,63,89,67,43,47,70,99,53,78,112,52,68,63,49,42,56,46,72,95,57,88,81,104,88,115,66,92,97,69,112,88)
+
+ADL <- c(39,52,89,57,28,34,42,52,88,90,38,83,30,45,47,90,63,34,76,26,68,85,22,82,80,80,81,30,27,72,46,63,45,77,42,60,33,49,89,72,45,73,58,33,34,90,48,47,32,63,76,79,48,90,55,83,50,44,79,24,40,35,55,45,46,37,47,28,61,35,68,80,43,53,60,63,28,35,37,82,88,52,30,69,52,59,53,65,90,88,66,60,48,82,88,63,79,71,66,81)
+
+MEM <- c(4,33,17,31,35,3,16,6,41,24,22,41,9,33,36,17,14,35,33,13,34,28,12,57,51,20,20,7,27,9,15,52,26,57,10,34,14,30,64,31,24,13,16,17,13,42,7,17,13,32,50,44,57,33,11,24,21,31,30,5,20,15,9,28,19,4,29,23,8,31,65,29,8,14,30,22,9,18,33,25,16,15,16,49,17,38,22,56,12,42,12,21,14,41,24,49,34,38,48,66)
+
+COG <- c(18,9,3,7,19,25,17,26,13,3,13,11,24,14,18,0,16,22,23,18,26,10,16,3,3,18,1,17,27,0,22,13,18,0,19,11,14,15,0,3,19,3,15,21,18,6,23,18,15,15,5,11,9,6,20,11,25,18,20,22,17,27,21,17,17,21,3,21,7,26,6,10,13,18,16,18,27,14,17,13,0,0,18,12,20,17,21,2,0,6,23,7,13,13,14,5,3,17,13,1)
+
+mydata <- data.frame(KBI,ADL,MEM,COG)
+str(mydata)
+head(mydata)
+```
+
+Visualization
+
+```{r}
+pairs(~KBI + ADL + MEM + COG, data = mydata,
+      lower.panel = NULL,
+      main = "Scatterplot Matrix")
+```
+
+
+## Question 1
+
+```{r}
+mydata.LM1 <- lm(KBI ~ ADL + MEM + COG, data = mydata)
+summary(mydata.LM1)
+```
+
+The multiple regression equition is:
+
+$KBI = 40.5 + 0.2 \times ADL + 0.6 \times MEM + 0.1 \times COG$
+
+The mean KBI when ADL, MEM and COG are zero is 40.5. For every extra unit of ADL, the expected KBI increases by 0.2 points, holding other variables constant. For every extra unit of MEM, the mean KBI increases by 0.6 points, holding other variables constant. For every extra unit of COG, the mean KBI increases by 0.1 points, holding other variables constant.
+
+## Question 2
+
+Evaluate the presence of outliers in the dependent variable using standardised residuals.
+
+There are two observations greater than two standard deviations larger than the mean and there are one observations less than two standard deviations below the mean. There are three outliers in the dependent variable in total. 
+
+```{r}
+mydata$FITTED <- predict(mydata.LM1, type = "response")
+mydata$RESID <- resid(mydata.LM1)
+
+mydata$RSTAND <- rstandard(mydata.LM1)
+plot(RSTAND ~ FITTED, data = mydata,
+     ylab = "Standardised Residuals",
+     xlab = "Fitted Values",
+     main = "Standardised RvF Plot")
+abline(h = c(-2, 2), col = "red")
+
+mydata[abs(mydata$RSTAND) > 2,]
+```
+
+
+## Question 3
+
+Evaluate the presence of outliers in the independent variables using leverage values.
+
+The plot shows 7 observations are high-leverage points.They are outliers in the independent variable.
+
+```{r}
+mydata$HAT <- hatvalues(mydata.LM1)
+HAT.CUT <- 2 * (3 + 1)/ length(KBI)
+ID <- seq(1,length(KBI),by = 1)
+plot(HAT ~ ID, data = mydata,
+     ylab = "Leverage",
+     xlab = "ID Number",
+     main = "Leverage by Index Plot")
+abline(h = HAT.CUT, col = "red")
+
+mydata[mydata$HAT > HAT.CUT,]
+```
+## Question 4
+
+Evaluate the presence of influential observations using Cook’s distance.
+
+The plot shows there are 4 observations with high Cook's distance values. Two of them (ID79 and ID84) are detected as having high standardised residuals.
+
+```{r}
+mydata$COOK <- cooks.distance((mydata.LM1))
+COOK.CUT <- 4/length(ID)
+plot(COOK ~ ID, data = mydata,
+     ylab = "Cook's Distance",
+     xlab = "ID Number",
+     main = "Cook's Distrance by Index Plot")
+abline(h = COOK.CUT, col = "red")
+
+mydata[mydata$COOK > COOK.CUT,]
+
+```
+
+## THE END
+
+
