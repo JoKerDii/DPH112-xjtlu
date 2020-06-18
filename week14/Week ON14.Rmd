@@ -1,0 +1,133 @@
+---
+title: "Week ON13"
+author: "Elmer V Villanueva"
+date: "18 May 2020"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# SET YOUR WORKING DIRECTORY!
+```{r}
+setwd("C:/Users/1/Dropbox/00 - Working Folder/Teaching/DPH112/2019-2020/Week ON14")
+```
+
+# Announcements 
+* The remaining coursework assessment and the final paper have deadlines as follows 
+
+| Assessment | Due Date | Days Till Deadline |
+|:--------------------|---------:|----:|
+| Coursework 2        | 30 May   | 5  |
+| Final Paper         | 17 June  | 23  |
+
+* All the assessments are to be completed INDIVIDUALLY. No collusion is allowed. This means that you cannot discuss this assignment with other students, nor can you share your approach or code.
+
+* The running count for students forwarding errors is as follows:
+
+| Student | Items Identified |
+|:--------|:----------------:|
+| Yijia Jiang | 6 |
+| Jing Wang   | 3 |
+| Yuxuan Wu   | 2 |
+| Xinwen Hu   | 1 |
+| Yuxin Zhang | 1 |
+
+* This is second last week of sessions. Next week will be our last week.
+
+# Reading
+Read and understand Vittinghoff et al., Chapter 5.
+
+\newpage
+
+# Examples of Reporting of Logistic Regression Results in the Primary Literature
+Similar to our examination of examples of the reporting or results from linear regression models, we will spend this sessions evaluating some examples showing logistic regression results. This will be helpful for your second coursework assessment.
+
+## Example 1: Oppong et al. [1]
+
+### Objectives
+The authors wanted to study the association between race/ethnicity and breast density. By now, you should be able to find the objectives of the study. 
+
+### Methods
+Note how the dependent variable, originally classified using four categories (blue highlight in Figure 1), is "dichotomised" or reduced into two categories (yellow highlight in Figure 1) for the purposes of the analysis. This technique is easy to accomplish, but any reduction in data will result in a loss of information. Thus, you need to balance the advantages of dichotomisation against its downsides.
+
+![Section 2.3.2 in Oppong et al.](Oppong01.jpg)
+
+The statistical analysis section is quite brief. Note that the authors only mention multivariable (or multiple) logistic regression as their modelling technique. There is also no information about the types of models diagnostics that were conducted. This is clearly inappropriate.
+
+\newpage
+
+### Results
+Similar to the examples we evaluated previously, Oppong et al. use Table 1 to describe the characteristics of their study population. In this case, note how the group is divided according to levels of the dependent variable. That is, there is a column for low density and another for high density mammograms. 
+
+In Figure 2, I give a portion of the paper's Table 1. The p-value presented in the last column is derived from t-tests or chi-square tests, not from a logistsic regression. This was described in the statistical analysis section.
+
+![Portion of Table 1 in Oppong et al.](Oppong02.jpg)
+
+\newpage
+
+The main results arising from the multiple logistic regression model are presented in Table 2 of the paper. The table is recreated in Figure 3. 
+
+![Portion of Table 2 in Oppong et al.](Oppong03.jpg)
+
+Note that the authors do not present the regression equation. This is typical. As I mentioned in a previous lecture, presenting information in logit units is very difficult for most people to understand. Thus, the typical presentation of results is in odds ratios (ORs).
+
+The second column of the table states that the odds ratios are already adjusted for all other variables in the table. This might be a little difficult to understand, so we will interpret some results. Let us begin with the main independent variable: race. This variable is itnerpreted in this manner:
+
+- Compared to Hispanics, Blacks have an odds ratio of 0.45 (95% CI 0.38, 0.59) for high density compared to low density, after controlling for age, reproductive parity, menopausal status, age of menarche, family history of breast cancer and body mass index.
+- Compared to Hispanics, Whites have an odds ratio of 0.62 (95% CI 0.40, 0.96) for high density compared to low density, after controlling for age, reproductive parity, menopausal status, age of menarche, family history of breast cancer and body mass index.
+
+\newpage
+
+Would you be able to derive the regression equation from the data provided by the authors? Partially. The authors do not provide information about one regression estimate: the intercept. The others, however, may be estimated from the odds ratios that are presented. The regression equation for the Oppong et al. study is
+
+$logit(Low\ Density) = \beta_0 + ln(0.94) AGE + ln(0.47) BLACK + ln(0.38) WHITE + ln(0.83) PARITY12 + ln(0.62) PARITY3MORE + ln(0.72) POSTMENOPAUSAL + ln(1.05) MENARCHE + ln(1.02) FAMILYHISTORY + ln(0.29) OBESE$.
+
+This reduces to 
+
+$logit(Low\ Density) = \beta_0 - 0.0619 AGE - 0.7550 BLACK - 0.9676 WHITE - 0.1863 PARITY12 - 0.4780 PARITY3MORE - 0.3285 POSTMENOPAUSAL + 0.0488 MENARCHE + 0.0198 FAMILYHISTORY - 1.238 OBESE$.
+
+Finally, we have no information about the fitness of the model because no diagnostic tests were reported.
+
+## Example 2: Guo et al. [2]
+
+### Objectives 
+The authors wanted to evaluate the relationship between drug resistance to tuberculosis drugs and the characteristics of a paediatric patient or his or her clincial care.
+
+### Methods
+The dependent variable is easy to understand conceptually, but notice how the authors make it very complicated (Figure 4). There are three groups, pansensitive TB, DR-TB and MDR-TB. Given that there are three groups, will a logistic regression work? Since a logistic regression only deals with binary outcomes, the authors seem to have run three separate logistic regression models. The first compares pansensitive with DR TB; the second compares pansensitive with MDR TB; the last compares DR-TB with MDR-TB. This is quite inefficient. There are models designed for dependent variables with more than two groups. The authors should have used those models, instead of three separate logistic regressions.
+
+![Definition of Outcome Variable in Guo et al.](Guo01.jpg)
+
+The rest of the statistical analysis section identifies univariate and multivariate logistic regression analysis as the main techniques used. Once again, there is no mention of diagnostic tests.
+
+\newpage
+
+### Results
+The authors do not have a single table describing their study population. This is a major oversight. Instead, the ready is forced to examine Tables 2 to 4 to get a sense of the characteristics of the study population. Since these are the same tables that present the main results, it is quite difficult to read and understand the true study population.
+
+Let us look at one of the logistic regression models reported by the authors. In Table 2 of the paper, the authors report the comparison between DR-TB and pansensitive TB. The table is shown in Figure 5.
+
+![Logistic regression results in Table 2 of Guo et al.](Guo02.jpg)
+
+The results are presented as ORs and 95% CIs in the last two columns. The second last column presents "crude" or unadjusted ORs. That is, these only compare one variable at a time. The last column presents adjusted ORs. There is no notation, but the adjustment seems to have considered all other variables in the table.
+
+Let us interpret some results.
+
+*Crude OR for sex*. Female children have a 34% increase in the odds of having DR-TB versus pansensitive TB compared to male children.
+
+*Adjsuted OR for sex*. Female children have a 39% icnrease in the odds of having DR-TB versus pansensitive TB compared to male children after controlling for age, residence, BCG history, disease site and AFB smear result.
+
+*Adjusted OR for age*. Children aged between 5-9 years have an OR of 1.25 for DR-TB versus pansensitive TB compared to those aged less than 5 years, after controlling for sex, residence, BCG history, disease site and AFB smear result. Children at least 10 years of age have an OR of 1.74 for DR-TB versus pansensitive TB compared to those aged less than 5 years, after controlling for sex, residence, BCG history, disease site and AFB smear result.
+
+I leave to you the interpretation of results in Tables 3 and 4, as well as the derivation of the three partial regression equations.
+
+
+# References
+1. Oppong BA, Dash C, O'Neill S, Li Y, Makambi K, Pien E, Makariou E, Coleman T, Adams-Campbell LL. Breast density in multiethnic women presenting for screening mammography. *Breast J* 2018 ;24:334-338.
+
+2. Guo Q, PanY, Yang ZH, Liu RX, Xing LL, Peng Z, Zhu CM. Epidemiology and clinical characteristics of pediatric drug-resistant tuberculosis in Chongqing, China. *PLoS ONE* 2016;11:e0151303
+
+# THE END
