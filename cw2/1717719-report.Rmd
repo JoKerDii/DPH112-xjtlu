@@ -1,0 +1,125 @@
+---
+title: "Coursework Assessment 2 (244 words)"
+author: "Di Zhen 1717719"
+date: "5/23/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r include=FALSE}
+# Data
+library(readr)
+HINTS <- read_csv("D:/git/DPH112-xjtlu/cw2/HINTS.csv")
+HINTS.FIVE <- HINTS[,c("heardhpvvaccine2","qualitycare","whenpaptest","age","speakenglish")]
+
+# Data cleaning
+library(dplyr)
+HINTS.CLEAN <- HINTS.FIVE %>%
+  filter(heardhpvvaccine2 > 0) %>%
+  filter(qualitycare >0) %>%
+  filter(whenpaptest > 0 & whenpaptest < 6) %>%
+  filter(age > 0) %>%
+  filter(speakenglish >0) %>%
+  mutate(whenpaptest = ifelse(whenpaptest == 1, "<1",
+                                     ifelse(whenpaptest == 2, "1-2",
+                                            ifelse(whenpaptest == 3, "2-3",
+                                                   ifelse(whenpaptest == 4, "3-5",">5"))))) %>%
+  mutate(whenpaptest = factor( whenpaptest, c("<1","1-2","2-3","3-5",">5"))) %>%
+  mutate(heardhpvvaccine2 = ifelse(heardhpvvaccine2 == 1, "Yes","No")) %>%
+  mutate(heardhpvvaccine2 = factor(heardhpvvaccine2, c("No","Yes"))) %>%
+  mutate(qualitycare = ifelse(qualitycare == 1, "Excellent",
+                                     ifelse(qualitycare == 2, "Very_good",
+                                            ifelse(qualitycare == 3, "Good",
+                                                   ifelse(qualitycare == 4, "Fair", "Poor"))))) %>%
+  mutate(qualitycare = factor(qualitycare, c("Excellent", "Very_good", "Good", "Fair", "Poor"))) %>%
+  mutate(speakenglish_d = ifelse(speakenglish == 1 | speakenglish == 2,"confident", "non-confident")) %>%
+  mutate(speakenglish_d = factor(speakenglish_d, c("confident", "non-confident"))) %>%
+  mutate(speakenglish = factor(speakenglish))
+
+```
+
+
+## Introduction
+
+This report summarizes the results of logistic regression modeling on whether a person heard about HPV shot, using data from HINTS conducted in 2014.[1]
+
+## Method
+
+A logistic regression of whether a person heard about HPV shot on quality of healthcare, adjusting for the time since the last Pap test, age, and English proficiency was performed. Then VIF and Cook's distance were measured, and Hosmer-Lemeshow chi-squared test and pseudo-$R^2$ were conducted. The data analysis was conducted in R (Version 3.6.1).
+
+## Results
+
+```{r include=FALSE}
+# Fit the logistic regression model
+HINTS.CLEAN.GLM <- glm(heardhpvvaccine2 ~ qualitycare + whenpaptest + age + speakenglish_d, 
+                       data = HINTS.CLEAN,
+                       family = binomial(link = "logit"))
+summary(HINTS.CLEAN.GLM)
+exp(HINTS.CLEAN.GLM$coefficients)
+exp(confint(HINTS.CLEAN.GLM,level = 0.95))
+```
+
+
+The logistic regression equation is:
+
+$\begin{aligned}
+    logit(Hear~about~vaccine) =  3.6 - 0.1 \times Very~good~healthcare - 0.3 \times Good~healthcare\\
+    ~~~~~~~~~~~~~~~~  - 0.4 \times Fair~healthcare - 0.1 \times Poor~healthcare + 0.1 \times 1to2h~after~Pap\\
+    ~~~~~~~~~~~~~~~~  + 0.01 \times 2to3h~after~Pap - 0.2 \times 3to5h~after~Pap - 0.1 \times >5h~after~Pap\\
+    ~~~~~~~~~~~~~~~~  - 0.04 \times age - 1.0 \times nonconfident~English\\
+    \end{aligned}$   
+    
+    
+The OR, CI, p-value and VIF are reported in Table 1. Compared to people with excellent health care, those with very good, good, fair and poor health care have ORs of 0.9 (95% CI 0.7, 1.2), 0.8 (95% CI 0.5, 1.1), 0.6 (95% CI 0.4, 1.1) and 0.9 (95% CI 0.4, 2.4) respectively for hearing about the vaccine compared to not hearing about it, after controlling for other variables. 
+Quality of healthcare and time after Pap-test are not significant, while age and English proficiency are significant. 
+
+
+Table 1. Statistics Summary of Logistic Regression
+
+| Variable | Adjusted Odds Ratio (95% CI) | p-value | VIF | 
+|:---------|:--------------------|--------:|----:|
+| Quality of health care |                            |
+|  Excellent | 1.0 |
+|  Very good | 0.9 (0.7, 1.2) | 0.503 | 1.3 | 
+|  Good | 0.8 (0.5, 1.1) | 0.145 | 1.2 |
+|  Fair | 0.6 (0.4, 1.1) | 0.084 | 1.1 |
+|  Poor | 0.9 (0.4, 2.4) | 0.780 | 1.0 |
+| Time after Pap test | |
+| <1 | 1.0| 
+|  1-2 | 1.1 (0.8, 1.5) | 0.487 | 1.2 |
+|  2-3 | 1.0 (0.7, 1.6) | 0.948 | 1.1 |
+|  3-5 | 0.8 (0.5, 1.4) | 0.448 | 1.1 |
+|  >5 | 0.9 (0.7, 1.3) | 0.677 | 1.3 |
+| age          | 1.0 (0.9, 1.0) | < 2e-16 | 1.2 |
+| English proficiency | | 
+| Confident | 1.0 |
+| Non-confident | 0.4 (0.2, 0.6) | 8.39e-05 | 1.0 |
+
+The VIFs are about 1, showing that there is no multicollinearity between the predictors. In figure 1, there are 86 outliers with high Cook's distance values. The p-value is 0.48 in Hosmer-Lemeshow chi-squared test, so we conclude the model is poorly fitted. Pseudo $R^2$ is 0.141, indicating the model explains 14.1% of the variation in the dependent variable.
+
+  
+```{r echo = FALSE}
+# diagnosis - COOK
+ID <- rep(1:nrow(HINTS.CLEAN), by =  1)
+HINTS.CLEAN$COOK <- cooks.distance(HINTS.CLEAN.GLM)
+COOK.CUT <- 4/length(ID)
+plot(COOK ~ ID, data = HINTS.CLEAN,
+     ylab = "Cook's Distance",
+     xlab = "ID Number",
+     main = "Figure 1. Cook's Distance by Index Plot")
+abline(h = COOK.CUT, col = "red")
+```
+
+## Conclusion
+
+In conclusion, people with better quality of healthcare are more likely to hear about HPV shot.
+
+## References
+
+[1] Nelson DE, Kreps GL, Hesse BW, et al. The Health Information National Trends Survey (HINTS): development, design, and dissemination. J Health Commun. 2004;9(5):443‐84. doi:10.1080/10810730490504233

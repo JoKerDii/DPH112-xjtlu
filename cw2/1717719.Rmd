@@ -1,0 +1,141 @@
+---
+title: "Di Zhen 1717719"
+author: "dizhen"
+date: "5/21/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Data import
+
+```{r}
+# Data
+library(readr)
+HINTS <- read_csv("D:/git/DPH112-xjtlu/cw2/HINTS.csv")
+HINTS.FIVE <- HINTS[,c("heardhpvvaccine2","qualitycare","whenpaptest","age","speakenglish")]
+str(HINTS.FIVE)
+head(HINTS.FIVE)
+```
+
+## Data cleaning
+
+```{r}
+# Data cleaning
+library(dplyr)
+HINTS.CLEAN <- HINTS.FIVE %>% 
+  filter(heardhpvvaccine2 > 0) %>%
+  filter(qualitycare >0) %>%
+  filter(whenpaptest > 0 & whenpaptest < 6) %>%
+  filter(age > 0) %>%
+  filter(speakenglish >0) %>%
+  mutate(whenpaptest = ifelse(whenpaptest == 1, "<1",
+                                     ifelse(whenpaptest == 2, "1-2",
+                                            ifelse(whenpaptest == 3, "2-3",
+                                                   ifelse(whenpaptest == 4, "3-5",">5"))))) %>%
+  mutate(whenpaptest = factor( whenpaptest, c("<1","1-2","2-3","3-5",">5"))) %>%
+  mutate(heardhpvvaccine2 = ifelse(heardhpvvaccine2 == 1, "Yes","No")) %>%
+  mutate(heardhpvvaccine2 = factor(heardhpvvaccine2, c("No","Yes"))) %>%
+  mutate(qualitycare = ifelse(qualitycare == 1, "Excellent", 
+                                     ifelse(qualitycare == 2, "Very_good", 
+                                            ifelse(qualitycare == 3, "Good",
+                                                   ifelse(qualitycare == 4, "Fair", "Poor"))))) %>%
+  mutate(qualitycare = factor(qualitycare, c("Excellent", "Very_good", "Good", "Fair", "Poor"))) %>%
+  mutate(speakenglish_d = ifelse(speakenglish == 1 | speakenglish == 2,"confident", "non-confident")) %>%
+  mutate(speakenglish_d = factor(speakenglish_d, c("confident", "non-confident"))) %>%
+  mutate(speakenglish = factor(speakenglish))
+str(HINTS.CLEAN)
+head(HINTS.CLEAN)
+```
+
+## Data visualization
+
+```{r}
+# Visualization
+pairs(~heardhpvvaccine2 + qualitycare + whenpaptest + age + speakenglish_d, data = HINTS.CLEAN,
+      lower.panel = NULL,
+      main = "Figure 1. Scatterplot Matrix")
+```
+
+
+## Logistic regression model
+
+```{r}
+# Fit the logistic regression model
+HINTS.CLEAN.GLM <- glm(heardhpvvaccine2 ~ qualitycare + whenpaptest + age + speakenglish_d, 
+                       data = HINTS.CLEAN,
+                       family = binomial(link = "logit"))
+summary(HINTS.CLEAN.GLM)
+```
+```{r}
+exp(HINTS.CLEAN.GLM$coefficients)
+exp(confint(HINTS.CLEAN.GLM,level = 0.95))
+```
+
+## Model diagnostics
+
+```{r}
+# diagnosis - vif
+library(car)
+vif(HINTS.CLEAN.GLM)
+# VIF(qualitycare) VIF(whenpaptest) VIF(age) VIF(speakenglish_d) are all near to 1. This indicates the absence of colinearity. We can conclude that there is no multicollinearity between the predictors.
+```
+
+
+```{r}
+# diagnostics - leverage value
+HINTS.CLEAN$HAT <- hatvalues(HINTS.CLEAN.GLM)
+ID <- rep(1:nrow(HINTS.CLEAN), by =  1)
+HAT.CUT <- 2*(10+1)/length(ID)
+plot(HAT ~ ID, data = HINTS.CLEAN,
+     ylab = "Leverage",
+     xlab = "ID Number",
+     main = "Leverage by Index Plot")
+abline(h = HAT.CUT, col = "red")
+
+HINTS.CLEAN[HINTS.CLEAN$HAT > HAT.CUT,]
+
+
+# The result shows that 180 observations are high-leverage points.  They are outliers occuring in the independent variable space.
+```
+```{r}
+# diagnosis - COOK
+HINTS.CLEAN$COOK <- cooks.distance(HINTS.CLEAN.GLM)
+COOK.CUT <- 4/length(ID)
+plot(COOK ~ ID, data = HINTS.CLEAN,
+     ylab = "Cook's Distance",
+     xlab = "ID Number",
+     main = "Cook's Distance by Index Plot")
+abline(h = COOK.CUT, col = "red")
+
+HINTS.CLEAN[HINTS.CLEAN$COOK > COOK.CUT,]
+# There are 86 observations with high Cook's distance values. They are outliers.
+
+```
+
+```{r}
+# diagnostic test
+if(!require(LogisticDx)){install.packages("LogisticDx")}
+library("LogisticDx")
+gof(HINTS.CLEAN.GLM, plotROC = FALSE, g = 9)
+# From the result of Hosmer-Lemeshow chi-squared test, p-value is 0.48. As this tests the null hypothesis that the model is a poor fit for the data, p-value is large enough that we fail to reject the null hypothesis at the 0.05 level of significance. Therefore, we conclude that the model is poorly fitted.
+```
+
+```{r}
+# diagnostic test
+
+if(!require(rms)){install.packages("rms")}
+library("rms")
+heard <- HINTS.CLEAN$heardhpvvaccine2
+quality <- HINTS.CLEAN$qualitycare
+when <- HINTS.CLEAN$whenpaptest
+age <- HINTS.CLEAN$age
+speakenglish_d <- HINTS.CLEAN$speakenglish_d
+
+HINTS.CLEAN.GLM.DX <- lrm(heard ~ quality + when + age + speakenglish_d)
+HINTS.CLEAN.GLM.DX
+# The Nagelkirke's R^2 is 0.141. The model explains about 14.1% of the variability in heardhpvvaccine2 classification.
+
+```
