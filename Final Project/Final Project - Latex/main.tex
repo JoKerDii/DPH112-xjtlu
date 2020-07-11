@@ -1,0 +1,84 @@
+%%%%%%%%%%%%%%%%%%%%%%%%% PREAMBLE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{rotating}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{subcaption}
+\usepackage[]{natbib}
+\bibliographystyle{apalike}
+\usepackage{geometry}
+\geometry{a4paper,total={150mm},left=30mm,right=30mm,top=30mm,bottom=30mm}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\graphicspath{{/images/}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\title{Final Project (1653 words)}
+\author{Di Zhen (1717719)}
+\date{\today}
+\maketitle
+\newpage
+
+\section*{Introduction}
+
+Suicide has drawn a primary public health concern in China. There are about 13 deaths per 100,000 people commit suicide each year. The features of suicide in China are important and unique. They are different from the features in the western world. In China, women are more likely to commit suicide than men \citep{ChenZReportontheThird}. The elderly have a higher suicide rate than the young \citep{PhillipsMR}. People living in rural areas commit more suicide than those in urban \citep{YangGH}. And pesticide self-poisoning has been reported to be the main suicide method \citep{AjdacicGrossV}. In addition, suicide actions not only result in loss of lives but also cause hospitals to suffer from a tremendous burden on resources, since the majority of people who committed suicide are survived and hospital-admitted.
+\newline
+\newline
+The study of fatal suicide attempts in China would indicate factors leading to a fatal outcome after a suicide attempt, and also give suggestions about the prevention of suicide acts. In this report, we replicate part of the surveillance study \citep{Sun2015} on the incidence and fatality of serious suicide attempts (SSA) in Shandong, China. 
+
+\section*{Methods}
+
+The data are from two public health surveillance system, which are the Disease Surveillance Points (DSP) system and Shandong Injury Surveillance System (ISS). The authors in the surveillance study \citep{Sun2015} extracted data of suicide deaths and hospitalizations in three selected cities in Shandong, China and ascertained the cases by the 10th revision of the International Classification of Diseases and Related Health Problems.
+\newline
+\newline
+After categorizing and cleaning the data, there are 2289 people and 8 major variables including whether dead or not, living in urban or rural areas, sex, age group, education level, occupation, method of suicide, and season of suicide. The age group includes 10-34, 35-49, 50-64, and no less than 65. The education level includes illiterate, primary, and no less than secondary level (secondary and tertiary). The occupation includes farming and all others(household, professional, unemployed, business, student, worker, retiree, others). The methods of suicide include hanging, pesticide, other poison(other poison, unspecified poison), and all others(cutting, drowning, jumping, others). The season is defined as spring(March-May), summer(June-August), autumn(September-November) and winter(December-February).
+\newline
+\newline
+Fatality rate(\%) is the proportion of died cases among all SSAs. $\chi^2$ test was conducted to test the differences in fatality between groups and p-values were reported. Multiple logistic regression was also applied to test the associations between main factors and fatality, and the ORs, 95\% CIs and p-values were reported. In order to extend the analysis of the authors', the assumption of multiple logistic regression mentioned above was tested. In addition, the data were grouped by residency, sex, age group, education, occupation, method, and season.Then, the number of death for each group was counted. Using this grouped data, a Poisson regression was conducted to analyze the associations between main factors and fatality, and the assumption of the Poisson regression was tested subsequently. All statistical analyses were conducted in R (Version 3.6.3).
+
+\section*{Results and Discussion}
+
+As shown in Table \ref{tab:T1}, people who are living in a urban area, who are male, who are older, who are with low education, or with a farmer occupation have higher fatality rates (all chi-square test, p-value < 0.05). As for the suicide methods, the fatality of using other poison (10.0\%) is the lowest, while the fatality of hanging (97.4\%) is the highest. Attempts in seasons other than summer have higher fatality rates. The p-values of chi-square test are all less than 0.05, indicating that those independent variables are significantly associated with the fatality.
+\newpage
+\input{Table1.tex}
+
+The result of multiple logistic regression is summarized in Table \ref{tab:T1}. People living in urban have a 18\% increase in the odds of death by suicide compared to those living in rural areas, after controlling for sex, age group, education, occupation, method, and season. Males have a 30\% increase in the odds of death by suicide compared to female after controlling for other variables. Those in the age group of 35-49, 50-64, and 65 and above have ORs of 1.33, 1.59, and 2.13 for death due to suicide versus being alive compared to those in the age group 10-34, after controlling for other variables. People with primary and illiterate educational level have a 377\% and 993\% increase in the odds of death due to suicide compared to those with secondary and above educational level, after controlling for other variables. People who are farmer have a 35\% increase in the odds of death due to suicide compared to those with vocations other than farming, after controlling for other variables. Those hanging and using other methods to commit suicide have a 2579\% and 270\% increase in the odds of death due to suicide compared to those using pesticides, after controlling for other variables. While those using other poison have a 91.0\% decrease in the odds of death due to suicide compared to those using pesticides, after controlling for other variables. People committing suicide in autumn, winter and spring have a 11\%, 65\%, and 65\% increase in the odds of death due to suicide compared to those committing suicide in summer, after controlling for the other variables. The p values of urban residency, 10-34 age group, Farming, and suicide in autumn are not significant, while others are significant (p-value > 0.05).
+\newline
+\input{Table2.tex}
+\newline
+The result of a Poisson regression is summarized in Table \ref{tab:T2}. Compared to people living in rural areas, those in urban have a 79\% decrease in fatality rate after controlling for sex, age group, education, occupation, method, and season. Compared to females, males have a 9\% increase in fatality rate after controlling for other variables. Compared to those in the age group of 10-34, people in the age group of 35-49, 50-64, and 65 and more age groups have 19\%, 68\%, and 184\% increase respectively in fatality rate, after controlling for other variables. Compared to those with secondary and above education, people with primary and illiterate education have 38\% and 48\% increase respectively in fatality rate after controlling for other variables. Compared to people with occupations other than farmers, those farmers have a 273\% increase in fatality rate after controlling for other variables. Compared to people using pesticides to commit suicide, those using other poison, hanging, and using other methods have 96\%, 25\%, and 80\% decrease respectively in fatality rate, after controlling other variables. Compared to cases in summer, those who suicide in autumn, winter, and spring have 4\%,  3\% decrease and, 31\% increase respectively in fatality rate, after controlling for other variables. The p-values of male, age group of 35-49, suicide in autumn and winter are not significant(p-value >0.05), while others are statistically significant.
+\newline
+\newline
+The result of multiple logistic regression and Poisson regression is slightly different. Most of the CIs of variables in multiple logistic regression are wider than those in Poisson regression. The ORs obtained in the Poisson regression may be more precise than those obtained in multiple regression. In addition, people living in urban are more likely to die due to suicide estimated by a logistic regression model, while this is not the case in Poisson regression model. Hanging and all other methods are more likely to lead to death after suicide compared to pesticide, while they are not in Poisson regression. People committed suicide in autumn and winter are more likely to die by suicide than summer, while they are not in Poisson regression. Therefore, multiple logistic regression and Poisson regression both shows that those people who are male, who are older, who are with low education level, or as farmers, who commit suicide in spring, are more likely to die as a result of suicide. 
+\newline
+\newline
+In the diagnostic testing of the multiple logistic regression model, the variance inflation factor(VIF) is calculated and summarized in Table \ref{tab:T3}. Nearly all VIF scores are near to 1. This indicates the absence of collinearity, as the VIF scores are far less than 5. In addition, leverage values are calculated to evaluate the presence of outliers in the independent variables, we obtain 153 high-leverage points (Figure \ref{fig:lev}). All the hat values of outliers are less than 0.1. In the estimation of Cook's distance, there are 148 observations with high Cook's distance values (Figure \ref{fig:cook}). Furthermore, in Hosmer-Lemeshow chi-squared test, p-value is 0.442. The p-value is large enough that we fail to reject the null hypothesis that the model is not well fitted, at the 0.05 level of significance. We conclude that this multiple logistic regression model is poorly fitted. The Nagelkirke's $R^2$ is 0.523, meaning that about 52.3\% of the variability in the dependent variable is explained by the independent variables.
+\newline
+\newline
+In the diagnostic testing of the Poisson regression model, the VIF is calculated and summarized in Table \ref{tab:T4}. Nearly all VIF scores are less than 5, indicating the absence of collinearity. In addition, there are 55 high-leverage points (Figure \ref{fig:lev2}). Two of them have hat values of more than 0.1. In the estimation of Cook's distance, there is 63 observation with high Cook's distance values (Figure \ref{fig:cook2}). Furthermore, in the goodness of fit testing, residual deviance (731.91) is not equal to the degrees of freedom (465). Therefore, the data are overdispersed and the Poisson model may not be appropriate.
+
+
+\input{Figure1.tex}
+\input{Figure2.tex}
+\newpage
+\input{Table3.tex}
+\input{Table4.tex}
+\newpage
+\section*{Conclusion}
+
+In this study of fatality of suicide in a Chinese
+population, factors including age group, education, occupation, method, and season are tested to be influential on the fatality rate after suicide in both models. People who are living in urban areas, who are male, who are older, who are with low education, or with a farmer occupation and who hung to suicide have higher fatality rates as shown in the result of multiple logistic regression. Unlike the result in multiple logistic regression, in the Poisson regression, however, people living in rural areas have a higher fatality rate after suicide, and people who hung, who suicide in autumn or winter have a lower fatality rate due to suicide. And sex difference seems to be not significant in the fatality rate in Poisson regression model. This study gives suggestions about the targets which should be focused on and provided suicide prevention. 
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{ref.bib}
+
+
+
+
+\end{document}

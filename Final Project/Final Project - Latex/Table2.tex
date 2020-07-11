@@ -1,0 +1,52 @@
+% Poisson Regression
+\begin{table}[!htbp]
+\centering
+\begin{tabular}[c]{@{}lll@{}}
+\toprule
+ & \multicolumn{2}{c}{\textbf{Poisson Regression}} \\* \midrule
+
+\textbf{~}  & \textbf{OR(95\% CI)}& \textbf{p Value*} \\ \midrule
+
+\textbf{\textit{Residency}} & ~ & ~   \\
+\textbf{\textit{~~~~Rural}} & 1.00 & Reference   \\
+\textbf{\textit{~~~~Urban}} & 0.21 (0.17, 0.26) & <0.001  \\
+
+\textbf{\textit{Sex}}  & ~ & ~ \\
+\textbf{\textit{~~~~Female}} & 1.00 & Reference   \\
+\textbf{\textit{~~~~Male}} & 1.09 (0.97, 1.22) & NS \\  
+
+\textbf{\textit{Age group}} & ~ & ~ \\
+\textbf{\textit{~~~~10-34}} & 1.00 & Reference  \\ 
+\textbf{\textit{~~~~35-49}} & 1.19 (0.94, 1.50) & NS \\ 
+\textbf{\textit{~~~~50-64}} & 1.68 (1.36, 2.08) & <0.001 \\
+\textbf{\textit{~~~~65 and above}} &  2.84 (2.33, 3.50) & <0.001 \\
+
+\textbf{\textit{Education}} & ~ & ~ \\
+\textbf{\textit{~~~~Secondary and above}} & 1.00 & Reference \\  
+\textbf{\textit{~~~~Primary}} & 1.38 (1.20, 1.60) & <0.001 \\ 
+\textbf{\textit{~~~~Illiterate}} & 1.48 (1.28, 1.72)& <0.001 \\
+
+\textbf{\textit{Occupation}} & ~ & ~ \\
+\textbf{\textit{~~~~All Others}} & 1.00 & Reference \\
+\textbf{\textit{~~~~Farming}} & 3.73 (3.15, 4.45) & <0.001 \\
+
+\textbf{\textit{Method}} & ~ & ~  \\
+\textbf{\textit{~~~~Pesticide}} & 1.00 & Reference  \\
+\textbf{\textit{~~~~Other poison}} & 0.04 (0.02, 0.07) & <0.001 \\
+\textbf{\textit{~~~~Hanging}} & 0.75 (0.66, 0.85) & <0.001 \\
+\textbf{\textit{~~~~All others}} & 0.20 (0.15, 0.27) & <0.001 \\
+
+\textbf{\textit{Season}} & ~ & ~  \\
+\textbf{\textit{~~~~Summer}} & 1.00 & Reference \\
+\textbf{\textit{~~~~Autumn}} & 0.96 (0.82, 1.13) & NS \\
+\textbf{\textit{~~~~Winter}} & 0.97 (0.82, 1.14) & NS \\
+\textbf{\textit{~~~~Spring}} & 1.31 (1.12, 1.52) & <0.001 \\* 
+\bottomrule
+
+\end{tabular}
+
+\footnotesize{*Test for regression coefficients in the Poisson regression model.}\\
+\footnotesize{NS, not signficant (p>0.05); SSA, serious suicide attempts.}\\
+\caption{Results of Poisson regression analysis (ORs and 95\% CIs)}
+\label{tab:T2}
+\end{table}

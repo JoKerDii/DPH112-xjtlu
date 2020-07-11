@@ -1,0 +1,309 @@
+---
+title: "Final Project"
+author: "dizhen"
+date: "6/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Set directory and import data
+```{r}
+setwd("D:/git/DPH112-xjtlu/final proj")
+library(dplyr)
+library(readr)
+library(tidyr)
+
+Sun <- read_csv("Sun.csv")
+glimpse(Sun)
+```
+
+## Data cleaning
+
+```{r}
+
+Sun_Clean <- Sun %>%
+  filter(Urban != "unknown" & Education != "unknown" & Occupation != "others/unknown" & method != "unspecified") %>%
+  mutate(AgeG = ifelse(Age >= 10 & Age <=34, "10-34",
+                        ifelse(Age >= 35 & Age <= 49, "35-49", 
+                               ifelse(Age >= 50 & Age <= 64, "50-64",
+                                      ifelse(Age >=65, "65+", "NA"))))) %>%
+  filter(AgeG != "NA") %>%
+  mutate(Education = ifelse(Education == "iliterate", "iliterate", 
+                            ifelse(Education == "primary", "primary", "Secondary+"))) %>%
+  mutate(Occupation = ifelse(Occupation == "farming", "farming", "AllOthers")) %>%
+  mutate(method = ifelse(method == "Pesticide" | method == "pesticide", "Pesticide", 
+                         ifelse(method == "hanging", "hanging", 
+                                ifelse(method == "other poison" | method == "Other poison" | method == "Poison unspec", "OtherPoison", "AllOthers")))) %>%
+  mutate(Season = ifelse(Month == 3 | Month == 4 | Month == 5, "Spring", 
+                         ifelse(Month == 6 | Month == 7 | Month == 8, "Summer", 
+                                ifelse(Month == 9 | Month == 10 | Month == 11, "Autumn", "Winter")))) %>%
+  # factorization
+  mutate(method = factor(method, levels = c("Pesticide", "OtherPoison", "hanging", "AllOthers"))) %>%
+  mutate(Occupation = factor(Occupation, levels = c("AllOthers", "farming"))) %>%
+  mutate(Education = factor(Education, levels = c("Secondary+", "primary", "iliterate"))) %>%
+  mutate(AgeG = factor(AgeG, levels = c("10-34", "35-49","50-64","65+"))) %>%
+  mutate(Urban = factor(Urban, levels = c("no", "yes"))) %>% 
+  mutate(Sex = factor(Sex, levels = c("female","male"))) %>%
+  mutate(Season = factor(Season, levels = c("Summer", "Autumn", "Winter", "Spring"))) %>%
+  mutate(Died = factor(Died, levels = c("no", "yes"))) %>%
+  mutate(Hospitalised = factor(Hospitalised, levels = c("no", "yes"))) %>%
+  as.data.frame()
+  
+str(Sun_Clean)
+head(Sun_Clean)
+
+```
+
+
+## Fatality Rate and Chi square test
+
+```{r}
+# Bivariate Analysis
+
+## 1. Residency
+# Number of SSAs
+Sun_Clean %>% group_by(Urban) %>% count()
+# number of death
+Sun_Clean %>% filter(Died == "yes") %>% group_by(Urban) %>% count(Died)
+# Fatality rate
+Sun_Clean %>% filter(Urban == "yes") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Urban == "no") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+# Differences in fatality between groups (Chi square)
+Sun_Clean %>% select(Urban, Died) %>% table() %>% chisq.test(correct = FALSE)
+
+## 2. Sex
+# Number of SSAs
+Sun_Clean %>% group_by(Sex) %>% count()
+# number of death
+Sun_Clean %>% filter(Died == "yes") %>% group_by(Sex) %>% count(Died)
+# Fatality rate
+Sun_Clean %>% filter(Sex == "female") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Sex == "male") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+# Differences in fatality between groups (Chi square)
+Sun_Clean %>% select(Sex, Died) %>% table() %>% chisq.test(correct = FALSE)
+
+## 3. Age Group
+# Number of SSAs
+Sun_Clean %>% group_by(AgeG) %>% count()
+# number of death
+Sun_Clean %>% filter(Died == "yes") %>% group_by(AgeG) %>% count(Died)
+# Fatality rate
+Sun_Clean %>% filter(AgeG == "10-34") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(AgeG == "35-49") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(AgeG == "50-64") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(AgeG == "65+") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+# Differences in fatality between groups (Chi square)
+Sun_Clean %>% select(AgeG, Died) %>% table() %>% chisq.test(correct = FALSE)
+
+## 4. Education
+# Number of SSAs
+Sun_Clean %>% group_by(Education) %>% count()
+# number of death
+Sun_Clean %>% filter(Died == "yes") %>% group_by(Education) %>% count(Died)
+# Fatality rate
+Sun_Clean %>% filter(Education == "Secondary+") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Education == "primary") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Education == "iliterate") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+# Differences in fatality between groups (Chi square)
+Sun_Clean %>% select(Education, Died) %>% table() %>% chisq.test(correct = FALSE)
+
+## 5. Occupation
+# Number of SSAs
+Sun_Clean %>% group_by(Occupation) %>% count()
+# number of death
+Sun_Clean %>% filter(Died == "yes") %>% group_by(Occupation) %>% count(Died)
+# Fatality rate
+Sun_Clean %>% filter(Occupation == "AllOthers") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Occupation == "farming") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+# Differences in fatality between groups (Chi square)
+Sun_Clean %>% select(Education, Died) %>% table() %>% chisq.test(correct = FALSE)
+
+## 6. method
+# Number of SSAs
+Sun_Clean %>% group_by(method) %>% count()
+# number of death
+Sun_Clean %>% filter(Died == "yes") %>% group_by(method) %>% count(Died)
+# Fatality rate
+Sun_Clean %>% filter(method == "Pesticide") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(method == "OtherPoison") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(method == "hanging") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(method == "AllOthers") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+# Differences in fatality between groups (Chi square)
+Sun_Clean %>% select(method, Died) %>% table() %>% chisq.test(correct = FALSE)
+
+## 7. Season
+# Number of SSAs
+Sun_Clean %>% group_by(Season) %>% count()
+# number of death
+Sun_Clean %>% filter(Died == "yes") %>% group_by(Season) %>% count(Died)
+# Fatality rate
+Sun_Clean %>% filter(Season == "Summer") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Season == "Autumn") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Season == "Winter") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+Sun_Clean %>% filter(Season == "Spring") %>% group_by(Died) %>% summarise(n = n()) %>% mutate(p = n/sum(n))
+# Differences in fatality between groups (Chi square)
+Sun_Clean %>% select(Season, Died) %>% table() %>% chisq.test(correct = FALSE)
+
+```
+
+
+
+## Multivariable logistic regression
+
+```{r}
+# Multiple logistic regression
+Sun_Clean_GLM <- glm(Died ~ Urban + Sex + AgeG + Education + Occupation + method + Season,
+                     family = binomial(link = "logit"), data = Sun_Clean)
+summary(Sun_Clean_GLM)
+
+# Odds ratio
+exp(coef(Sun_Clean_GLM))
+
+# 95% CI
+exp(confint(Sun_Clean_GLM))
+```
+
+## Test Assumption of Multivariable logistic regression
+
+```{r}
+# diagnosis - vif
+library(car)
+vif(Sun_Clean_GLM)
+# VIFs are all near to 1. This indicates the absence of colinearity. We can conclude that there is no multicollinearity between the predictors.
+```
+
+
+```{r}
+# diagnostics - leverage value
+Sun_Clean$HAT <- hatvalues(Sun_Clean_GLM)
+ID <- Sun_Clean$Person_ID
+HAT.CUT <- 2*(14+1)/length(ID)
+png("Leverage_of_logit.png")
+plot(HAT ~ ID, data = Sun_Clean,
+     ylab = "Leverage",
+     xlab = "ID Number") # main = "Figure 1. Leverage by Index Plot"
+abline(h = HAT.CUT, col = "red")
+dev.off()
+Sun_Clean[Sun_Clean$HAT > HAT.CUT,]
+# The result shows that 153 observations are high-leverage points.  They are outliers occuring in the independent variable space.
+```
+
+```{r}
+# diagnosis - COOK
+Sun_Clean$COOK <- cooks.distance(Sun_Clean_GLM)
+COOK.CUT <- 4/length(ID)
+png("cook_for_logit.png")
+plot(COOK ~ ID, data = Sun_Clean,
+     ylab = "Cook's Distance",
+     xlab = "ID Number") # main = "Cook's Distance by Index Plot"
+abline(h = COOK.CUT, col = "red")
+dev.off()
+Sun_Clean[Sun_Clean$COOK > COOK.CUT,]
+# There are 148 observations with high Cook's distance values. They are outliers.
+
+```
+
+```{r}
+# diagnostic test
+if(!require(LogisticDx)){install.packages("LogisticDx")}
+library("LogisticDx")
+gof(Sun_Clean_GLM, plotROC = FALSE, g = 9)
+# From the result of Hosmer-Lemeshow chi-squared test, p-value is 0.442. As this tests the null hypothesis that the model is a poor fit for the data, p-value is large enough that we fail to reject the null hypothesis at the 0.05 level of significance. Therefore, we conclude that the model is poorly fitted.
+```
+
+```{r}
+# diagnostic test
+
+if(!require(rms)){install.packages("rms")}
+library("rms")
+
+Sun_Clean_GLM.DX <- lrm(Died ~ Urban + Sex + AgeG + Education + Occupation + method + Season, data = Sun_Clean)
+Sun_Clean_GLM.DX
+# The Nagelkirke's R^2 is 0.523. The model explains about 52.3% of the variability in dependent variable.
+
+```
+
+
+## Poisson Regression
+
+```{r}
+# Data Preparation
+mydata <- Sun_Clean %>%
+  select(Died, Urban, Sex, AgeG, Education, Occupation, method, Season) %>%
+  # filter(Died == "yes") %>%
+  mutate(Died = ifelse(Died == "yes", 1,0)) %>%
+  group_by(Urban, Sex, AgeG, Education, Occupation, method, Season) %>%
+  summarise(n = sum(Died)) %>%
+  as.data.frame()
+
+str(mydata)
+
+## Poisson regression
+Sun_Clean_Poi <- glm(n ~ Urban + Sex + AgeG + Education + Occupation + method + Season,
+                     family = poisson, data = mydata)
+summary(Sun_Clean_Poi)
+
+# Odds Ratio
+exp(coef(Sun_Clean_Poi))
+```
+
+
+
+```{r}
+# Odds Ratio
+exp(coef(Sun_Clean_Poi))
+# 95% CI
+exp(confint(Sun_Clean_Poi))
+```
+
+## Test Assumption (Diagnostic testing)
+
+```{r}
+# Goodness of fit testing
+summary(Sun_Clean_Poi)
+# Goodness of fit testing: residual deviance is 518.1 while the degrees of freedom is 329. They are not equal. Therefore, the data are overdispersed and the Poisson model may not be appropriate
+```
+
+
+```{r}
+# diagnosis - vif
+library(car)
+vif(Sun_Clean_Poi)
+# VIFs are all less than 5. This indicates the absence of colinearity. We can conclude that there is no multicollinearity between the predictors.
+```
+
+
+```{r}
+# diagnostics - leverage value
+mydata$HAT <- hatvalues(Sun_Clean_Poi)
+ID <- rep(1:nrow(mydata), by =  1)
+HAT.CUT <- 2*(14+1)/length(ID)
+png("Leverage_for_poisson.png")
+plot(HAT ~ ID, data = mydata,
+     ylab = "Leverage",
+     xlab = "ID Number") # main = "Leverage by Index Plot"
+abline(h = HAT.CUT, col = "red")
+dev.off()
+mydata[mydata$HAT > HAT.CUT,]
+# The result shows that 55 observations are high-leverage points.  They are outliers occuring in the independent variable space.
+
+```
+
+```{r}
+# diagnosis - COOK
+mydata$COOK <- cooks.distance(Sun_Clean_Poi)
+COOK.CUT <- 4/length(ID)
+png("cook_for_poisson.png")
+plot(COOK ~ ID, data = mydata,
+     ylab = "Cook's Distance",
+     xlab = "ID Number") # main = "Cook's Distance by Index Plot"
+abline(h = COOK.CUT, col = "red")
+dev.off()
+mydata[mydata$COOK > COOK.CUT,]
+# There are 63 observations with high Cook's distance values. They are outliers.
+
+```
