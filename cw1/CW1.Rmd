@@ -1,0 +1,175 @@
+---
+title: "CW1"
+author: "dizhen"
+date: "4/26/2020"
+output:
+  html_document: 
+    toc: yes
+    theme: united
+  pdf_document: 
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import and clean the data
+
+Set directory
+
+```{r}
+setwd('D:/git/DPH112-xjtlu/cw1')
+```
+
+
+```{r}
+library(readr)
+library(dplyr)
+
+HINTS <- read_csv("HINTS.csv")
+HINTS.FOUR <- HINTS[,c("bmi","averagedailytvgames","genderc","generalhealth","weight")]
+str(HINTS.FOUR)
+head(HINTS.FOUR)
+```
+
+```{r}
+# check independet variables
+table(HINTS.FOUR$averagedailytvgames)
+table(HINTS.FOUR$genderc)
+table(HINTS.FOUR$generalhealth)
+table(HINTS.FOUR$weight[which(HINTS.FOUR$weight< 0)])
+table(HINTS.FOUR$bmi[which(HINTS.FOUR$bmi< 0)])
+summary(HINTS.FOUR$weight)
+
+HINTS.CLEAN <- HINTS.FOUR %>% 
+  filter(averagedailytvgames >= 0) %>%
+  filter(genderc >0) %>%
+  filter(generalhealth > 0) %>%
+  filter(weight > 0) %>%
+  filter(bmi >0) %>%
+  mutate(generalhealth = factor(generalhealth)) %>%
+  mutate(genderc = factor(genderc)) 
+
+str(HINTS.CLEAN)
+head(HINTS.CLEAN)
+save(HINTS.CLEAN,file = "HINTS.CLEAN.RData")
+```
+
+
+The sample size is 3677 in total with no NA.
+
+The independent variable `AverageDailyTVGames` is a categorical variable with values from 0 to 24 hours, plus -4 meaning unreadable or non-conforming numeric response, and -9 meaning missing data. There are 101 records of `AverageDailyTVGames = -9` and 39 records of `AverageDailyTVGames = -4`. Here, we discard the those records.
+
+`genderc` is a categorical variable with values -9(missing data), 1(Male) and 2(Female). There are 69 records with `genderc = -9`. Here, we discard those records.
+
+`generalhealth` is an ordinal variable with values from 1 to 5, plus -5 meaning multiple responses selected in error, and -9 meaning missing data. There are 105 records of `generalhealth = -9` and 15 records of `generalhealth = -5`. Here, we discard the those records.
+
+`weight` is a continuous variable with the maximum value of 442 and minimum value of 40 in pounds, plus -9 meaning missing data, and -4 meaning unreadable or non-conforming numeric response. There are 148 records of `weight = -9` and 1 record of `weight = -4`. Here we discard them.
+
+The dependent variable `bmi` is continuous with two invalid value -9 (missing data) and -4 (unreadable or nonconforming numeric response). There are 162 records with -9 and 15 records with -4. Here we discard those records.
+
+After cleaning the data, now the sample size is 3331.
+
+## Visualization
+
+```{r}
+pairs(~bmi + averagedailytvgames + genderc + generalhealth + weight, data = HINTS.CLEAN,
+      lower.panel = NULL,
+      main = "Figure 1. Scatterplot Matrix")
+```
+
+## Fit the multiple linear regression model
+
+```{r}
+HINTS.CLEAN.LM1 <- lm(bmi ~ averagedailytvgames + genderc + generalhealth + weight, data = HINTS.CLEAN)
+summary(HINTS.CLEAN.LM1)
+confin<- confint(HINTS.CLEAN.LM1, level = 0.95)
+
+```
+
+The multiple linear regression equation is 
+$$
+BMI = 0.24 + 0.04*averagedailytvgames + 4.25*genderc2+0.38*generalhealth2\\ +0.84*generalhealth3+1.65*generalhealth4+ 1.53*generalhealth5 + 0.14* weight
+$$
+
+
+## Diagnostic tests
+
+### Assessing assumptions about the form of the model
+
+1. Plot the residuals against the fitted values (RvF plot)
+```{r}
+HINTS.CLEAN$FITTED <- predict(HINTS.CLEAN.LM1, type = "response")
+HINTS.CLEAN$RESID <- resid(HINTS.CLEAN.LM1)
+head(HINTS.CLEAN)
+plot(RESID~FITTED, data = HINTS.CLEAN,
+     main = "Figure 2. RvF Plot",
+     ylab = "Residuals")
+```
+
+2.  Plot the residuals against each of the predictors
+
+```{r}
+pairs(~RESID + averagedailytvgames + genderc + generalhealth + weight, data=HINTS.CLEAN,
+      lower.panel=NULL,
+      main = "Figure 3. Residuals against Each Predictors")
+```
+
+Conclusion:
+
+In the RvF plot(Figure 2.), there are some deviations. In the scatterplot matrix (Figure 3.), we are only interested in the first row. There are also some deviations. The assumption of linearity may be violated. 
+
+### Assessing assumptions about the errors
+
+Produce a quantile-quantile plot of the residuals.
+
+```{r}
+qqnorm(HINTS.CLEAN$RESID,
+       main = "Figure 4. Normal Quantile-Quantile Plot of Ordianry Residuals")
+qqline(HINTS.CLEAN$RESID)
+```
+
+Conclusion:
+
+First, Figure 3 shows some deviation in the right tail and left tail. The assumption of normality may not be satisfied. Second, there is wedge-shaped pattern in Figure 2. The assumption of equal variance of residuals may not be satisfied. Third, Evidence about independence is available from the design of data.
+
+
+### Assessing assumptions about the predictors
+
+Calculate variance inflation factor or VIF to detect the presence of multicollinearity between the predictors.
+
+```{r}
+# The fitted model
+HINTS.CLEAN.LM1 <- lm(bmi ~ averagedailytvgames + genderc + generalhealth + weight, data = HINTS.CLEAN)
+```
+
+```{r}
+library(car)
+vif(HINTS.CLEAN.LM1)
+```
+
+Conclusion:
+
+There are three assumptions about the predictors. First, the independent variables are nonrandom, which is satisfied. Second, the independent variables are meansured without error, which is also satisfied. Third, the independent variables are linearly independent of each other which is tested by VIF. The VIF values for all predictors are all < 10, indicating the absence of collienarity.
+
+
+### Assessing assumptions about the observations
+
+Evaluate the presence of influential observations using Cook’s distance.
+
+```{r}
+HINTS.CLEAN$COOK <- cooks.distance((HINTS.CLEAN.LM1))
+ID <- seq(1,nrow(HINTS.CLEAN),by = 1)
+COOK.CUT <- 4/length(ID)
+plot(COOK ~ ID, data = HINTS.CLEAN,
+     ylab = "Cook's Distance",
+     xlab = "ID Number",
+     main = "Figure 5. Cook's Distrance by Index Plot")
+abline(h = COOK.CUT, col = "red")
+
+HINTS.CLEAN[HINTS.CLEAN$COOK > COOK.CUT,]
+
+```
+
+THE END

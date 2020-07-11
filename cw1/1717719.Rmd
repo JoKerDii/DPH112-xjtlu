@@ -1,0 +1,189 @@
+---
+title: "Modeling BMI with the Multiple Linear Regression [232 words]"
+author: "Di Zhen (1717719)"
+date: "4/29/2020"
+output:
+  pdf_document:
+    # toc: yes
+    df_print: kable
+  html_document:
+    theme: united
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r include=FALSE}
+# set directory
+setwd('D:/git/DPH112-xjtlu/cw1')
+
+# packages
+library(readr)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(tidyr)
+library(car)
+
+# import data
+HINTS <- read_csv("HINTS.csv")
+HINTS.FOUR <- HINTS[,c("bmi","averagedailytvgames","genderc","generalhealth","weight")]
+
+# check independet variables
+table(HINTS.FOUR$averagedailytvgames)
+table(HINTS.FOUR$genderc)
+table(HINTS.FOUR$generalhealth)
+table(HINTS.FOUR$weight[which(HINTS.FOUR$weight< 0)])
+table(HINTS.FOUR$bmi[which(HINTS.FOUR$bmi< 0)])
+summary(HINTS.FOUR$weight)
+
+# clean the data
+HINTS.CLEAN <- HINTS.FOUR %>% 
+  filter(averagedailytvgames >= 0) %>%
+  filter(genderc >0) %>%
+  filter(generalhealth > 0) %>%
+  filter(weight > 0) %>%
+  filter(bmi >0) %>%
+  mutate(generalhealth = factor(generalhealth)) %>%
+  mutate(genderc = factor(genderc))%>%
+  mutate(weight.St = (weight-mean(weight))/sd(weight))
+
+```
+
+## Introduction
+
+This report summarizes the results of regression modeling on BMI using data from HINTS conducted in 2014. [1]
+
+## Method
+
+The data were imported and cleaned. A multiple linear regression of BMI on sedentary leisure time, respondent's sex, general health status and weight was performed. Then the diagnostic tests were conducted on the assumptions about form, errors, predictors and observations. The data analysis is conducted in R (Version 3.6.1).
+
+## Results
+
+
+```{r echo=FALSE}
+# load("HINTS.CLEAN.RData")
+pairs(~bmi + averagedailytvgames + genderc + generalhealth + weight.St, data = HINTS.CLEAN,
+      lower.panel = NULL,
+      main = "Figure 1. Scatterplot Matrix")
+```
+
+Figure 1 shows the scatterplot matrix of all variables. The multiple linear regression equation is:
+
+```{r include=FALSE}
+HINTS.CLEAN.LM1 <- lm(bmi ~ averagedailytvgames + genderc + generalhealth + weight.St, data = HINTS.CLEAN)
+summary(HINTS.CLEAN.LM1)
+
+# HINTS.CLEAN$genderc <- relevel(HINTS.CLEAN$genderc, ref = 2)
+# HINTS.CLEAN.LM1 <- lm(bmi ~  genderc , data = HINTS.CLEAN)
+# summary(HINTS.CLEAN.LM1)
+```
+
+
+$\begin{aligned}
+    BMI = 24.71 + 0.04\times averagedailytvgames + 4.25 \times genderc2+0.38 \times generalhealth2\\
+    \end{aligned}$    
+
+$\begin{aligned}
+    ~~~~~~~~~~~~~~~~+0.84\times generalhealth3+1.65\times generalhealth4+ 1.53\times generalhealth5 + 6.12\times weight\\
+    \end{aligned}$
+    
+    
+For every increased hour the respondents take for TV games, the BMI increased by 0.04 units, holding other variables constant.
+The effect of covariates is positive and significant (Table 1). The model fits the data well since overall p-value is less than $2.20 \times 10 ^{-16}$ and the model accounted for 82.25% variability of the data.
+
+
+```{r echo=FALSE}
+confin<- confint(HINTS.CLEAN.LM1, level = 0.95)
+coefficients <- HINTS.CLEAN.LM1$coefficients
+co_confin<-data.frame(coefficients,confin)
+
+p_value <- c("<2.00e-16",0.007, "<2.00e-16", 0.022, "6.64e-07","6.29e-16","1.88e-07","<2.00e-16")
+co_confin$p_value <- p_value
+colnames(co_confin) <- c("coefficients","start","end","p_value")
+rowname <- row.names(co_confin)
+
+co_confin <- co_confin %>% 
+  mutate(coefficients = round(coefficients, digit = 2),
+         start = round(start, digit =3), end = round(end, digit = 3))%>%
+  unite("95%_CI", start:end, sep= "-",remove = TRUE)
+
+row.names(co_confin) <- rowname
+
+kable(co_confin, align = "c",caption = "Model Statistics") %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+
+The assumptions of linearity, normality and equal variance of residuals are slightly violated(Figure 2-4).
+Evidence about independence, nonrandom independent variables and correct measurement are available from the design of data.
+The VIF values indicated the absence of collienarity (Table 2).
+And the Cook's distance indicated outliers in the independent or dependent variables (Figure 5). 
+
+```{r echo=FALSE}
+# 1. Assessing assumptions about the form of the model
+
+HINTS.CLEAN$FITTED <- predict(HINTS.CLEAN.LM1, type = "response")
+HINTS.CLEAN$RESID <- resid(HINTS.CLEAN.LM1)
+plot(RESID~FITTED, data = HINTS.CLEAN,
+     main = "Figure 2. RvF Plot",
+     ylab = "Residuals")
+
+
+pairs(~RESID + averagedailytvgames + genderc + generalhealth + weight.St, data=HINTS.CLEAN,
+      lower.panel=NULL,
+      main = "Figure 3. Residuals against Each Predictors")
+
+```
+
+
+
+```{r echo = FALSE}
+# 2. Assessing assumptions about the errors
+qqnorm(HINTS.CLEAN$RESID,
+       main = "Figure 4. Normal Quantile-Quantile Plot of Ordianry Residuals")
+qqline(HINTS.CLEAN$RESID)
+```
+
+
+```{r echo = FALSE}
+# 3. Assessing assumptions about the predictors
+
+HINTS.CLEAN.LM1 <- lm(bmi ~ averagedailytvgames + genderc + generalhealth + weight.St, data = HINTS.CLEAN)
+vif <- vif(HINTS.CLEAN.LM1)
+
+kable(vif, align = "c",caption = "VIF Statistic",digits = 2) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+
+```
+
+
+```{r echo = FALSE}
+# 4. Assessing assumptions about the observations
+HINTS.CLEAN$COOK <- cooks.distance((HINTS.CLEAN.LM1))
+ID <- seq(1,nrow(HINTS.CLEAN),by = 1)
+COOK.CUT <- 4/length(ID)
+plot(COOK ~ ID, data = HINTS.CLEAN,
+     ylab = "Cook's Distance",
+     xlab = "ID Number",
+     main = "Figure 5. Cook's Distrance by Index Plot")
+abline(h = COOK.CUT, col = "red")
+
+```
+
+```{r include=FALSE}
+cooktable <- HINTS.CLEAN[HINTS.CLEAN$COOK > COOK.CUT,]
+kable(cooktable, align = "c",caption = "Observations with High Cook's Distance",digits = 2) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F)
+```
+
+## Conclusion
+
+In conclusion, the less time for TV games, the less BMI people will have.
+
+## References
+
+[1] Nelson DE, Kreps GL, Hesse BW, et al. The Health Information National Trends Survey (HINTS): development, design, and dissemination. J Health Commun. 2004;9(5):443‐84. doi:10.1080/10810730490504233
